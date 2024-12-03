@@ -1,6 +1,7 @@
 {
   "images" : [
     {
+      "filename" : "favicon-16x16.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "16x16"
@@ -11,6 +12,7 @@
       "size" : "16x16"
     },
     {
+      "filename" : "favicon-32x32.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "32x32"
@@ -36,11 +38,13 @@
       "size" : "256x256"
     },
     {
+      "filename" : "android-chrome-512x512 1.png",
       "idiom" : "mac",
       "scale" : "2x",
       "size" : "256x256"
     },
     {
+      "filename" : "android-chrome-512x512.png",
       "idiom" : "mac",
       "scale" : "1x",
       "size" : "512x512"

@@ -12,11 +12,11 @@ struct ContentView: View {
 
     var body: some View {
         VStack {
-            Text("Последние 20 скопированных строк. До 5 строк можно закрепить.")
-                .font(.headline)
-                .padding()
-
             List {
+                Section(header: Text("Буфер обмена")
+                    .font(.headline)
+                    .padding()){}
+                
                 if !clipboardManager.pinnedItems.isEmpty {
                     Section(header: Text("Закрепленные")) {
                         ForEach(clipboardManager.pinnedItems, id: \.self) { item in
