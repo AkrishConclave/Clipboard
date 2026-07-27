@@ -11,27 +11,41 @@ struct ContentView: View {
     @EnvironmentObject var clipboardManager: ClipboardManager
 
     var body: some View {
-        VStack {
-            List {
-                Section(header: Text("Буфер обмена")
-                    .font(.headline)
-                    .padding()){}
-                
-                if !clipboardManager.pinnedItems.isEmpty {
-                    Section(header: Text("Закрепленные")) {
-                        ForEach(clipboardManager.pinnedItems, id: \.self) { item in
-                            ClipboardRow(item: item, isPinned: true)
+        NavigationStack {
+            VStack {
+                List {
+                    Section(header: Text("Буфер обмена")
+                        .font(.headline)
+                        .padding()){}
+
+                    if !clipboardManager.pinnedItems.isEmpty {
+                        Section(header: Text("Закрепленные")) {
+                            ForEach(clipboardManager.pinnedItems, id: \.self) { item in
+                                ClipboardRow(item: item, isPinned: true)
+                            }
+                        }
+                    }
+
+                    Section(header: Text("История")) {
+                        if clipboardManager.items.count < 1 {
+                            Text("Элементов нет")
+                                .font(.footnote)
+                        }
+                        ForEach(clipboardManager.items, id: \.self) { item in
+                            ClipboardRow(item: item, isPinned: false)
                         }
                     }
                 }
-
-                Section(header: Text("История")) {
-                    if clipboardManager.items.count < 1 {
-                        Text("Элементов нет")
-                            .font(.footnote)
-                    }
-                    ForEach(clipboardManager.items, id: \.self) { item in
-                        ClipboardRow(item: item, isPinned: false)
+                .listStyle(.inset)
+            }
+            .navigationTitle("Буфер обмена")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .automatic) {
+                    Button(action: {
+                        clipboardManager.syncWithServer()
+                    }) {
+                        Text("Синхронизация")
                     }
                 }
             }
