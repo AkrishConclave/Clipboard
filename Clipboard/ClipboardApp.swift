@@ -11,14 +11,22 @@ import AppKit
 @main
 struct ClipboardManagerApp: App {
     @StateObject private var clipboardManager = ClipboardManager()
+    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
-                .environmentObject(clipboardManager)
-                .onAppear {
-                    adjustWindowSize()
-                }
+            if isLoggedIn {
+                ContentView()
+                    .environmentObject(clipboardManager)
+                    .onAppear {
+                        adjustWindowSize()
+                    }
+            } else {
+                LoginView()
+                    .onAppear {
+                        adjustWindowSize()
+                    }
+            }
         }
     }
 

@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var clipboardManager: ClipboardManager
+    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
 
     var body: some View {
         NavigationStack {
@@ -42,10 +43,18 @@ struct ContentView: View {
                         Text("Синхронизация")
                     }
                 }
+                ToolbarItem(placement: .automatic) {
+                    Button(action: {
+                        isLoggedIn = false
+                    }) {
+                        Label("Выйти", systemImage: "rectangle.portrait.and.arrow.right")
+                    }
+                    .help("Выйти")
+                }
+                }
             }
         }
-        .frame(width: 300, height: 400) // Компактные размеры окна
-        .fixedSize(horizontal: false, vertical: true)
+        .frame(width: 300, height: 400)
     }
 }
 
