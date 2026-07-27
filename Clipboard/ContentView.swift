@@ -9,14 +9,11 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var clipboardManager: ClipboardManager
+    @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
 
     var body: some View {
-        VStack {
+        NavigationStack {
             List {
-                Section(header: Text("Буфер обмена")
-                    .font(.headline)
-                    .padding()){}
-                
                 if !clipboardManager.pinnedItems.isEmpty {
                     Section(header: Text("Закрепленные")) {
                         ForEach(clipboardManager.pinnedItems, id: \.self) { item in
@@ -28,16 +25,27 @@ struct ContentView: View {
                 Section(header: Text("История")) {
                     if clipboardManager.items.count < 1 {
                         Text("Элементов нет")
-                            .font(.footnote)
+                            .foregroundColor(.secondary)
                     }
                     ForEach(clipboardManager.items, id: \.self) { item in
                         ClipboardRow(item: item, isPinned: false)
                     }
                 }
             }
+            .listStyle(.inset)
+            .navigationTitle("Буфер обмена")
+            .toolbar {
+                ToolbarItem(placement: .automatic) {
+                    Button(action: {
+                        isLoggedIn = false
+                    }) {
+                        Label("Выйти", systemImage: "rectangle.portrait.and.arrow.right")
+                    }
+                    .help("Выйти")
+                }
+            }
         }
-        .frame(width: 300, height: 400) // Компактные размеры окна
-        .fixedSize(horizontal: false, vertical: true)
+        .frame(width: 300, height: 400)
     }
 }
 
