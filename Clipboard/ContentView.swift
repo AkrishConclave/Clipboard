@@ -34,7 +34,15 @@ struct ContentView: View {
             }
             .listStyle(.inset)
             .navigationTitle("Буфер обмена")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .automatic) {
+                    Button(action: {
+                        clipboardManager.syncWithServer()
+                    }) {
+                        Text("Синхронизация")
+                    }
+                }
                 ToolbarItem(placement: .automatic) {
                     Button(action: {
                         isLoggedIn = false
@@ -42,6 +50,7 @@ struct ContentView: View {
                         Label("Выйти", systemImage: "rectangle.portrait.and.arrow.right")
                     }
                     .help("Выйти")
+                }
                 }
             }
         }
