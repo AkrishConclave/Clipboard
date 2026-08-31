@@ -57,6 +57,22 @@ class ClipboardManager: ObservableObject {
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             if self.pasteboard.changeCount != self.lastChangeCount {
                 self.lastChangeCount = self.pasteboard.changeCount
+
+                // 🛡️ Sentinel: Ignore sensitive clipboard data (passwords)
+                if let types = self.pasteboard.types {
+                    let sensitiveTypes: [NSPasteboard.PasteboardType] = [
+                        .init("org.nspasteboard.ConcealedType"),
+                        .init("org.nspasteboard.TransientType"),
+                        .init("com.agilebits.onepassword")
+                    ]
+
+                    for type in sensitiveTypes {
+                        if types.contains(type) {
+                            return // Skip sensitive content
+                        }
+                    }
+                }
+
                 if let content = self.pasteboard.string(forType: .string) {
                     self.addItem(content)
                 }
