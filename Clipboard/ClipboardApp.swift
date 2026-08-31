@@ -45,6 +45,7 @@ struct ClipboardManagerApp: App {
 class ClipboardManager: ObservableObject {
     private let pasteboard = NSPasteboard.general
     private var lastChangeCount = 0
+    private var syncWorkItem: DispatchWorkItem?
 
     @Published var items: [String] = []
     @Published var pinnedItems: [String] = [] // Закреплённые элементы
@@ -76,7 +77,23 @@ class ClipboardManager: ObservableObject {
         syncWithServer()
     }
 
-    func syncWithServer() {
+    func syncWithServer(immediate: Bool = false) {
+        syncWorkItem?.cancel()
+
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.performSync()
+        }
+
+        syncWorkItem = workItem
+
+        if immediate {
+            DispatchQueue.main.async(execute: workItem)
+        } else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5, execute: workItem)
+        }
+    }
+
+    private func performSync() {
         guard let url = URL(string: "https://example.com/api/sync") else { return }
 
         let payload: [String: Any] = [
