@@ -62,6 +62,7 @@ struct ClipboardRow: View {
     @EnvironmentObject var clipboardManager: ClipboardManager
     let item: String
     let isPinned: Bool
+    @State private var hasCopied = false
 
     var body: some View {
         HStack {
@@ -70,11 +71,20 @@ struct ClipboardRow: View {
             Spacer()
             Button(action: {
                 copyToClipboard(item)
+                withAnimation {
+                    hasCopied = true
+                }
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    withAnimation {
+                        hasCopied = false
+                    }
+                }
             }) {
-                Image(systemName: "doc.on.doc")
+                Image(systemName: hasCopied ? "checkmark" : "doc.on.doc")
+                    .foregroundColor(hasCopied ? .green : .primary)
             }
             .buttonStyle(BorderlessButtonStyle())
-            .help("Скопировать")
+            .help(hasCopied ? "Скопировано!" : "Скопировать")
 
             if isPinned {
                 Button(action: {
