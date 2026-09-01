@@ -75,7 +75,11 @@ class ClipboardManager: ObservableObject {
                 }
 
                 if let content = self.pasteboard.string(forType: .string) {
-                    self.addItem(content)
+                    // 🛡️ Sentinel: Prevent memory exhaustion / DoS from extremely large clipboard payloads
+                    // A 5MB limit allows large code files and logs while preventing massive DoS vectors
+                    let maxLength = 5_000_000
+                    let sanitizedContent = content.count > maxLength ? String(content.prefix(maxLength)) + "...\n(Truncated due to extreme size limits)" : content
+                    self.addItem(sanitizedContent)
                 }
             }
         }

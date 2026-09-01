@@ -1,0 +1,4 @@
+## 2024-11-25 - [Clipboard Data Truncation]
+**Vulnerability:** The clipboard manager was reading unrestricted string data from the clipboard and storing it in memory and attempting to serialize it to JSON, opening up potential memory exhaustion (DoS) attacks or app crashes if extremely large strings were copied to the clipboard.
+**Learning:** In any application handling arbitrary clipboard data, there is a risk of processing massive amounts of data unintentionally (either maliciously or accidentally copied by a user). This is a hidden DoS vector.
+**Prevention:** Always implement a reasonable maximum length threshold (e.g., 5,000,000 characters or ~5MB) when capturing and storing clipboard string data. Truncate inputs that exceed this length. Setting this threshold too low (e.g., 10,000 characters) will lead to functional regressions where users lose data for larger legitimately copied items like source code or logs.
