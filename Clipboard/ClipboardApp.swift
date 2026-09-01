@@ -96,20 +96,26 @@ class ClipboardManager: ObservableObject {
     func syncWithServer(immediate: Bool = false) {
         syncWorkItem?.cancel()
 
+        // Capture current state to avoid thread-safety issues during serialization
+        let currentItems = self.items
+        let currentPinnedItems = self.pinnedItems
+
         let workItem = DispatchWorkItem { [weak self] in
-            self?.performSync()
+            self?.performSync(items: currentItems, pinnedItems: currentPinnedItems)
         }
 
         syncWorkItem = workItem
 
+        // Dispatch network and serialization work to a background queue
+        let queue = DispatchQueue.global(qos: .utility)
         if immediate {
-            DispatchQueue.main.async(execute: workItem)
+            queue.async(execute: workItem)
         } else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5, execute: workItem)
+            queue.asyncAfter(deadline: .now() + 1.5, execute: workItem)
         }
     }
 
-    private func performSync() {
+    private func performSync(items: [String], pinnedItems: [String]) {
         guard let url = URL(string: "https://example.com/api/sync") else { return }
 
         let payload: [String: Any] = [
