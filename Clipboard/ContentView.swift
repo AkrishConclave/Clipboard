@@ -38,7 +38,7 @@ struct ContentView: View {
             .toolbar {
                 ToolbarItem(placement: .automatic) {
                     Button(action: {
-                        clipboardManager.syncWithServer()
+                        clipboardManager.syncWithServer(immediate: true)
                     }) {
                         Text("Синхронизация")
                     }
