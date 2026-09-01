@@ -1,0 +1,3 @@
+## 2024-11-25 - Debouncing Network Calls & Offloading JSON Serialization for High-Frequency Polling
+**Learning:** In a macOS clipboard manager, polling `NSPasteboard` can trigger rapid state changes. Executing network requests (`syncWithServer`) synchronously on the main thread for every change causes UI stutter and redundant API calls. Even when using URLSession asynchronously, preparing the payload and JSON serialization on the main thread takes unnecessary cycles.
+**Action:** Always debounce network synchronizations triggered by high-frequency local events (like a timer-based clipboard poll). Additionally, wrap the payload preparation and serialization in a background `DispatchWorkItem` to ensure the main thread remains purely for UI updates and state management.
