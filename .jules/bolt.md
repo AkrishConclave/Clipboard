@@ -1,3 +1,7 @@
 ## 2024-05-24 - Debouncing Server Synchronization During Rapid System Events
 **Learning:** In a macOS clipboard manager, `NSPasteboard` changes can trigger multiple rapid updates (e.g., a user copying multiple items quickly or programmatic tools writing to the pasteboard). Firing an API synchronization network request on every single change event is an anti-pattern that leads to severe network congestion, unnecessary server load, and potential rate-limiting.
 **Action:** Always debounce network requests triggered by rapid system events using `DispatchWorkItem` and `DispatchQueue.main.asyncAfter`. Ensure the previous `DispatchWorkItem` is cancelled before scheduling a new one. Provide an `immediate` override flag for manual user interactions (like a "Sync Now" button) to maintain UI responsiveness while preventing automated network spam.
+
+## 2026-09-02 - Short-circuiting NSPasteboard Self-Induced Polling Loops
+**Learning:** When the app itself writes to `NSPasteboard` (e.g., a user clicks "Copy" on a history item), the pasteboard's `changeCount` increments. If a polling timer is monitoring this, the app redundantly reads its own copied data, causing unnecessary main-thread CPU usage, memory allocations, and duplicate checks.
+**Action:** When performing self-induced writes to `NSPasteboard`, immediately cache the resulting `pasteboard.changeCount` into the `lastChangeCount` state variable used by the monitoring timer. This short-circuits the polling mechanism and safely ignores self-inflicted clipboard updates.
