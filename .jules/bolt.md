@@ -5,3 +5,6 @@
 ## 2026-09-01 - Offload JSON Serialization from Main Thread
 **Learning:** In a native macOS application, running expensive operations like `JSONSerialization` synchronously on the main thread, especially on large clipboard payloads, can block the UI and drop frames. Combining debouncing with background dispatch ensures a fluid user experience.
 **Action:** When preparing data for API sync, capture the necessary local state synchronously on the main thread to avoid race conditions, then dispatch the serialization and network operations to a background queue (e.g., `DispatchQueue.global(qos: .utility)`).
+## 2026-09-02 - Short-circuiting NSPasteboard Self-Induced Polling Loops
+**Learning:** When the app itself writes to `NSPasteboard` (e.g., a user clicks "Copy" on a history item), the pasteboard's `changeCount` increments. If a polling timer is monitoring this, the app redundantly reads its own copied data, causing unnecessary main-thread CPU usage, memory allocations, and duplicate checks.
+**Action:** When performing self-induced writes to `NSPasteboard`, immediately cache the resulting `pasteboard.changeCount` into the `lastChangeCount` state variable used by the monitoring timer. This short-circuits the polling mechanism and safely ignores self-inflicted clipboard updates.
