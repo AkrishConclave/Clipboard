@@ -64,27 +64,29 @@ struct ClipboardRow: View {
     let isPinned: Bool
     @State private var hasCopied = false
 
+    @State private var isCopied = false
+
     var body: some View {
         HStack {
             Text(item)
                 .lineLimit(1)
             Spacer()
             Button(action: {
-                copyToClipboard(item)
+                clipboardManager.copyToClipboard(item)
                 withAnimation {
-                    hasCopied = true
+                    isCopied = true
                 }
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                     withAnimation {
-                        hasCopied = false
+                        isCopied = false
                     }
                 }
             }) {
-                Image(systemName: hasCopied ? "checkmark" : "doc.on.doc")
-                    .foregroundColor(hasCopied ? .green : .primary)
+                Image(systemName: isCopied ? "checkmark" : "doc.on.doc")
+                    .foregroundColor(isCopied ? .green : .primary)
             }
             .buttonStyle(BorderlessButtonStyle())
-            .help(hasCopied ? "Скопировано!" : "Скопировать")
+            .help(isCopied ? "Скопировано!" : "Скопировать")
 
             if isPinned {
                 Button(action: {
@@ -104,11 +106,5 @@ struct ClipboardRow: View {
                 .help("Закрепить")
             }
         }
-    }
-
-    func copyToClipboard(_ content: String) {
-        let pasteboard = NSPasteboard.general
-        pasteboard.clearContents()
-        pasteboard.setString(content, forType: .string)
     }
 }

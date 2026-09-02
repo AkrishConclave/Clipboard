@@ -75,7 +75,11 @@ class ClipboardManager: ObservableObject {
                 }
 
                 if let content = self.pasteboard.string(forType: .string) {
-                    self.addItem(content)
+                    // 🛡️ Sentinel: Prevent memory exhaustion / DoS from extremely large clipboard payloads
+                    // A 5MB limit allows large code files and logs while preventing massive DoS vectors
+                    let maxLength = 5_000_000
+                    let sanitizedContent = content.count > maxLength ? String(content.prefix(maxLength)) + "...\n(Truncated due to extreme size limits)" : content
+                    self.addItem(sanitizedContent)
                 }
             }
         }
@@ -157,6 +161,15 @@ class ClipboardManager: ObservableObject {
             pinnedItems.remove(at: index)
             addItem(item)
         }
+    }
+
+    /// ⚡ Bolt: copyToClipboard writes directly to NSPasteboard and immediately updates `lastChangeCount`.
+    /// This short-circuits `monitorClipboard` and prevents an unnecessary redundant read event/re-render.
+    func copyToClipboard(_ content: String) {
+        pasteboard.clearContents()
+        pasteboard.setString(content, forType: .string)
+        // Update lastChangeCount so the timer ignores this self-induced change
+        lastChangeCount = pasteboard.changeCount
     }
 }
 
