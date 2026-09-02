@@ -62,6 +62,7 @@ struct ClipboardRow: View {
     @EnvironmentObject var clipboardManager: ClipboardManager
     let item: String
     let isPinned: Bool
+    @State private var hasCopied = false
 
     @State private var isCopied = false
 
