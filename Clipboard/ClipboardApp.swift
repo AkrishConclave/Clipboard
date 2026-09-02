@@ -45,6 +45,7 @@ struct ClipboardManagerApp: App {
 class ClipboardManager: ObservableObject {
     private let pasteboard = NSPasteboard.general
     private var lastChangeCount = 0
+    private var syncWorkItem: DispatchWorkItem?
 
     // Bolt Optimization: Work item for debouncing network syncs
     private var syncWorkItem: DispatchWorkItem?
@@ -60,8 +61,28 @@ class ClipboardManager: ObservableObject {
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
             if self.pasteboard.changeCount != self.lastChangeCount {
                 self.lastChangeCount = self.pasteboard.changeCount
+
+                // 🛡️ Sentinel: Ignore sensitive clipboard data (passwords)
+                if let types = self.pasteboard.types {
+                    let sensitiveTypes: [NSPasteboard.PasteboardType] = [
+                        .init("org.nspasteboard.ConcealedType"),
+                        .init("org.nspasteboard.TransientType"),
+                        .init("com.agilebits.onepassword")
+                    ]
+
+                    for type in sensitiveTypes {
+                        if types.contains(type) {
+                            return // Skip sensitive content
+                        }
+                    }
+                }
+
                 if let content = self.pasteboard.string(forType: .string) {
-                    self.addItem(content)
+                    // 🛡️ Sentinel: Prevent memory exhaustion / DoS from extremely large clipboard payloads
+                    // A 5MB limit allows large code files and logs while preventing massive DoS vectors
+                    let maxLength = 5_000_000
+                    let sanitizedContent = content.count > maxLength ? String(content.prefix(maxLength)) + "...\n(Truncated due to extreme size limits)" : content
+                    self.addItem(sanitizedContent)
                 }
             }
         }
@@ -80,8 +101,29 @@ class ClipboardManager: ObservableObject {
     }
 
     func syncWithServer(immediate: Bool = false) {
-        // Bolt Optimization: Cancel any pending sync to debounce
         syncWorkItem?.cancel()
+
+        // Capture current state to avoid thread-safety issues during serialization
+        let currentItems = self.items
+        let currentPinnedItems = self.pinnedItems
+
+        let workItem = DispatchWorkItem { [weak self] in
+            self?.performSync(items: currentItems, pinnedItems: currentPinnedItems)
+        }
+
+        syncWorkItem = workItem
+
+        // Dispatch network and serialization work to a background queue
+        let queue = DispatchQueue.global(qos: .utility)
+        if immediate {
+            queue.async(execute: workItem)
+        } else {
+            queue.asyncAfter(deadline: .now() + 1.5, execute: workItem)
+        }
+    }
+
+    private func performSync(items: [String], pinnedItems: [String]) {
+        guard let url = URL(string: "https://example.com/api/sync") else { return }
 
         // Capture state on main thread before moving to background
         let payload: [String: Any] = [
@@ -147,6 +189,15 @@ class ClipboardManager: ObservableObject {
             pinnedItems.remove(at: index)
             addItem(item)
         }
+    }
+
+    /// ⚡ Bolt: copyToClipboard writes directly to NSPasteboard and immediately updates `lastChangeCount`.
+    /// This short-circuits `monitorClipboard` and prevents an unnecessary redundant read event/re-render.
+    func copyToClipboard(_ content: String) {
+        pasteboard.clearContents()
+        pasteboard.setString(content, forType: .string)
+        // Update lastChangeCount so the timer ignores this self-induced change
+        lastChangeCount = pasteboard.changeCount
     }
 }
 

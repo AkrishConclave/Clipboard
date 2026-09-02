@@ -34,6 +34,7 @@ struct LoginView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .disabled(username.isEmpty || password.isEmpty)
+            .keyboardShortcut(.defaultAction)
         }
         .padding()
         .frame(width: 300, height: 400)
