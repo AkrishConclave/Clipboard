@@ -4,3 +4,6 @@
 ## 2024-05-18 - Clipboard Action Feedback
 **Learning:** Clipboard copy actions require explicit visual confirmation. Since the system pasteboard doesn't provide default feedback, users can be unsure if a click succeeded, leading to repeated clicks and degraded UX.
 **Action:** Always provide inline, temporary visual feedback (e.g., checkmark icon + updated tooltip) immediately upon successful clipboard copy operations.
+## 2024-11-26 - SwiftUI macOS Toolbar Buttons Consistency
+**Learning:** For SwiftUI toolbar buttons on macOS, prefer using `Label` with system images and `.help()` modifiers over plain `Text`. This ensures the system can adapt the button display (icon, text, or both) based on user preferences and provides crucial context for screen readers and tooltips.
+**Action:** Always check toolbar items for plain `Text` definitions and upgrade them to `Label` components with `.help()` tooltips to align with native macOS standards.

@@ -40,8 +40,9 @@ struct ContentView: View {
                     Button(action: {
                         clipboardManager.syncWithServer(immediate: true)
                     }) {
-                        Text("Синхронизация")
+                        Label("Синхронизация", systemImage: "arrow.triangle.2.circlepath")
                     }
+                    .help("Синхронизировать сейчас")
                 }
                 ToolbarItem(placement: .automatic) {
                     Button(action: {
