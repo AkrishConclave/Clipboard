@@ -158,6 +158,15 @@ class ClipboardManager: ObservableObject {
             addItem(item)
         }
     }
+
+    /// ⚡ Bolt: copyToClipboard writes directly to NSPasteboard and immediately updates `lastChangeCount`.
+    /// This short-circuits `monitorClipboard` and prevents an unnecessary redundant read event/re-render.
+    func copyToClipboard(_ content: String) {
+        pasteboard.clearContents()
+        pasteboard.setString(content, forType: .string)
+        // Update lastChangeCount so the timer ignores this self-induced change
+        lastChangeCount = pasteboard.changeCount
+    }
 }
 
 
