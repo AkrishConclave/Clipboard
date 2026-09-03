@@ -11,3 +11,7 @@
 ## 2026-09-02 - Short-circuiting NSPasteboard Self-Induced Polling Loops
 **Learning:** When the app itself writes to `NSPasteboard` (e.g., a user clicks "Copy" on a history item), the pasteboard's `changeCount` increments. If a polling timer is monitoring this, the app redundantly reads its own copied data, causing unnecessary main-thread CPU usage, memory allocations, and duplicate checks.
 **Action:** When performing self-induced writes to `NSPasteboard`, immediately cache the resulting `pasteboard.changeCount` into the `lastChangeCount` state variable used by the monitoring timer. This short-circuits the polling mechanism and safely ignores self-inflicted clipboard updates.
+
+## 2026-09-03 - Prevent Main Thread Blocking During NSPasteboard Reading
+**Learning:** Reading string data from `NSPasteboard` can be surprisingly expensive, especially for large payloads, and reading `.count` on the resulting bridged `NSString` is an O(N) operation. Doing this synchronously inside a high-frequency polling timer on the main thread causes UI stutter and blocks user interaction.
+**Action:** When extracting data from `NSPasteboard`, dispatch the read operation to a background queue (`DispatchQueue.global(qos: .userInitiated)`). Always use `.utf16.count` for an O(1) string length check instead of `.count` to prevent performance regressions on large clipboard items. Finally, explicitly dispatch state updates (`addItem`) back to the main thread.

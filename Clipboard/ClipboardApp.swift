@@ -77,12 +77,19 @@ class ClipboardManager: ObservableObject {
                     }
                 }
 
-                if let content = self.pasteboard.string(forType: .string) {
-                    // 🛡️ Sentinel: Prevent memory exhaustion / DoS from extremely large clipboard payloads
-                    // A 5MB limit allows large code files and logs while preventing massive DoS vectors
-                    let maxLength = 5_000_000
-                    let sanitizedContent = content.count > maxLength ? String(content.prefix(maxLength)) + "...\n(Truncated due to extreme size limits)" : content
-                    self.addItem(sanitizedContent)
+                // ⚡ Bolt Optimization: Offload expensive NSPasteboard string extraction to a background queue
+                // and use .utf16.count for O(1) length check instead of O(N) string bridging
+                DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                    guard let self = self else { return }
+                    if let content = self.pasteboard.string(forType: .string) {
+                        // 🛡️ Sentinel: Prevent memory exhaustion / DoS from extremely large clipboard payloads
+                        // A 5MB limit allows large code files and logs while preventing massive DoS vectors
+                        let maxLength = 5_000_000
+                        let sanitizedContent = content.utf16.count > maxLength ? String(content.prefix(maxLength)) + "...\n(Truncated due to extreme size limits)" : content
+                        DispatchQueue.main.async {
+                            self.addItem(sanitizedContent)
+                        }
+                    }
                 }
             }
         }
