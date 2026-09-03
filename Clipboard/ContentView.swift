@@ -40,11 +40,13 @@ struct ContentView: View {
                     Button(action: {
                         clipboardManager.syncWithServer(immediate: true)
                     }) {
-                        Text("Синхронизация")
+                        Label("Синхронизация", systemImage: "arrow.triangle.2.circlepath")
                     }
+                    .help("Синхронизировать сейчас")
                 }
                 ToolbarItem(placement: .automatic) {
                     Button(action: {
+                        clipboardManager.clearData() // 🛡️ Sentinel: Clear sensitive clipboard history before logging out
                         isLoggedIn = false
                     }) {
                         Label("Выйти", systemImage: "rectangle.portrait.and.arrow.right")

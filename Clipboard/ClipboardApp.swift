@@ -75,7 +75,8 @@ class ClipboardManager: ObservableObject {
                     }
                 }
 
-                // ⚡ Bolt Optimization: Offload pasteboard reads to background queue
+                // ⚡ Bolt Optimization: Offload expensive NSPasteboard string extraction to a background queue
+                // and use .utf16.count for O(1) length check instead of O(N) string bridging
                 DispatchQueue.global(qos: .userInitiated).async { [weak self] in
                     guard let self = self else { return }
                     if let content = self.pasteboard.string(forType: .string) {
@@ -204,6 +205,14 @@ class ClipboardManager: ObservableObject {
         pasteboard.setString(content, forType: .string)
         // Update lastChangeCount so the timer ignores this self-induced change
         lastChangeCount = pasteboard.changeCount
+    }
+
+    /// 🛡️ Sentinel: Securely wipes in-memory clipboard data on logout
+    /// Prevents data leakage where the next authenticated user can view
+    /// the previous user's clipboard history.
+    func clearData() {
+        items.removeAll()
+        pinnedItems.removeAll()
     }
 }
 

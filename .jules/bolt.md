@@ -14,3 +14,7 @@
 ## 2024-12-05 - O(1) String Length Checks & Offloading Pasteboard Reads
 **Learning:** When polling `NSPasteboard` on a timer, extracting `pasteboard.string(forType:)` and calculating `content.count` on the main thread blocks the UI for large text payloads. Swift's `String.count` calculates grapheme clusters in O(N) time.
 **Action:** Always dispatch pasteboard string extraction to a background queue (e.g., `DispatchQueue.global(qos: .userInitiated)`). For simple length threshold checks on large strings, use `content.utf16.count` instead of `content.count` to achieve O(1) performance for bridged `NSString` data.
+
+## 2026-09-03 - Prevent Main Thread Blocking During NSPasteboard Reading
+**Learning:** Reading string data from `NSPasteboard` can be surprisingly expensive, especially for large payloads, and reading `.count` on the resulting bridged `NSString` is an O(N) operation. Doing this synchronously inside a high-frequency polling timer on the main thread causes UI stutter and blocks user interaction.
+**Action:** When extracting data from `NSPasteboard`, dispatch the read operation to a background queue (`DispatchQueue.global(qos: .userInitiated)`). Always use `.utf16.count` for an O(1) string length check instead of `.count` to prevent performance regressions on large clipboard items. Finally, explicitly dispatch state updates (`addItem`) back to the main thread.
