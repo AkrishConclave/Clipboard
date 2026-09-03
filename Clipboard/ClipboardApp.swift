@@ -130,7 +130,7 @@ class ClipboardManager: ObservableObject {
     }
 
     private func performSync(items: [String], pinnedItems: [String]) {
-        guard let url = URL(string: "https://example.com/api/sync") else { return }
+        guard let _ = URL(string: "https://example.com/api/sync") else { return }
 
         // Capture state on main thread before moving to background
         let payload: [String: Any] = [
@@ -138,18 +138,11 @@ class ClipboardManager: ObservableObject {
             "pinnedItems": pinnedItems
         ]
 
-        let workItem = DispatchWorkItem { [weak self] in
-            self?.performSync(payload: payload)
-        }
-
-        syncWorkItem = workItem
-
-        if immediate {
-            DispatchQueue.global(qos: .background).async(execute: workItem)
-        } else {
-            // Use 1.5s delay as in main, but run on background queue
-            DispatchQueue.global(qos: .background).asyncAfter(deadline: .now() + 1.5, execute: workItem)
-        }
+        // ⚡ Bolt Optimization: This method is already executing inside a debounced
+        // DispatchWorkItem from syncWithServer(immediate:). We avoid creating another
+        // DispatchWorkItem and overwriting `syncWorkItem`, which breaks debouncing.
+        // We also fix the compiler error by removing the undefined `immediate` reference.
+        self.performSync(payload: payload)
     }
 
     private func performSync(payload: [String: Any]) {
