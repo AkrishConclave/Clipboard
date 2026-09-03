@@ -206,6 +206,14 @@ class ClipboardManager: ObservableObject {
         // Update lastChangeCount so the timer ignores this self-induced change
         lastChangeCount = pasteboard.changeCount
     }
+
+    /// 🛡️ Sentinel: Securely wipes in-memory clipboard data on logout
+    /// Prevents data leakage where the next authenticated user can view
+    /// the previous user's clipboard history.
+    func clearData() {
+        items.removeAll()
+        pinnedItems.removeAll()
+    }
 }
 
 

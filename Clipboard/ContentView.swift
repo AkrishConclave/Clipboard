@@ -45,6 +45,7 @@ struct ContentView: View {
                 }
                 ToolbarItem(placement: .automatic) {
                     Button(action: {
+                        clipboardManager.clearData() // 🛡️ Sentinel: Clear sensitive clipboard history before logging out
                         isLoggedIn = false
                     }) {
                         Label("Выйти", systemImage: "rectangle.portrait.and.arrow.right")
