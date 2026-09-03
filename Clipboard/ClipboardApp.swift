@@ -45,8 +45,6 @@ struct ClipboardManagerApp: App {
 class ClipboardManager: ObservableObject {
     private let pasteboard = NSPasteboard.general
     private var lastChangeCount = 0
-    private var syncWorkItem: DispatchWorkItem?
-
     // Bolt Optimization: Work item for debouncing network syncs
     private var syncWorkItem: DispatchWorkItem?
 
@@ -85,7 +83,9 @@ class ClipboardManager: ObservableObject {
                         // 🛡️ Sentinel: Prevent memory exhaustion / DoS from extremely large clipboard payloads
                         // A 5MB limit allows large code files and logs while preventing massive DoS vectors
                         let maxLength = 5_000_000
+                        // ⚡ Bolt Optimization: Use O(1) .utf16.count for strings bridged from NSString
                         let sanitizedContent = content.utf16.count > maxLength ? String(content.prefix(maxLength)) + "...\n(Truncated due to extreme size limits)" : content
+
                         DispatchQueue.main.async {
                             self.addItem(sanitizedContent)
                         }
