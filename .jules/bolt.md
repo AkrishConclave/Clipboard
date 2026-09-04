@@ -22,3 +22,7 @@
 ## 2024-11-26 - Redundant Background Dispatch and Double-Delay Anti-Pattern
 **Learning:** When offloading work to a background queue with a delay (e.g., using `DispatchQueue.global(qos: .utility).asyncAfter`), wrapping the target method in another `DispatchWorkItem` that also performs a delayed dispatch creates a "double-delay" bug and spawns redundant background threads. In `ClipboardApp.swift`, `syncWithServer(immediate:)` already handled the delay and background dispatch, but `performSync(items:pinnedItems:)` duplicated this logic, unnecessarily increasing latency and thread contention.
 **Action:** Always verify the execution context (thread/queue) of the caller before dispatching a task to a background queue or adding a delay. If a method is only invoked from an asynchronous, delayed background block, it should execute its logic synchronously.
+
+## 2024-12-06 - Avoid `id: \.self` for large strings in SwiftUI ForEach
+**Learning:** In SwiftUI, using `id: \.self` for large strings inside a `ForEach` loop causes massive O(N) hashing overhead on the main thread during UI renders. This blocks the main thread and heavily degrades performance, especially in list views like those found in a clipboard manager where payloads can be very large.
+**Action:** Never use `id: \.self` for strings in `ForEach`. Always wrap string data in a dedicated `Identifiable` struct (e.g., combining the string with a `UUID`) so SwiftUI can uniquely identify and diff elements in O(1) time without rehashing the entire payload.

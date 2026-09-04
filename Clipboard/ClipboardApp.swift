@@ -42,14 +42,23 @@ struct ClipboardManagerApp: App {
     }
 }
 
+struct ClipboardItem: Identifiable, Equatable {
+    let id = UUID()
+    let content: String
+
+    static func == (lhs: ClipboardItem, rhs: ClipboardItem) -> Bool {
+        return lhs.content == rhs.content
+    }
+}
+
 class ClipboardManager: ObservableObject {
     private let pasteboard = NSPasteboard.general
     private var lastChangeCount = 0
     // Bolt Optimization: Work item for debouncing network syncs
     private var syncWorkItem: DispatchWorkItem?
 
-    @Published var items: [String] = []
-    @Published var pinnedItems: [String] = [] // Закреплённые элементы
+    @Published var items: [ClipboardItem] = []
+    @Published var pinnedItems: [ClipboardItem] = [] // Закреплённые элементы
 
     init() {
         monitorClipboard()
@@ -97,9 +106,9 @@ class ClipboardManager: ObservableObject {
 
     func addItem(_ content: String) {
         // Не добавляем, если уже есть в списке или среди закрепленных
-        guard !items.contains(content), !pinnedItems.contains(content) else { return }
+        guard !items.contains(where: { $0.content == content }), !pinnedItems.contains(where: { $0.content == content }) else { return }
         // Добавляем в начало списка
-        items.insert(content, at: 0)
+        items.insert(ClipboardItem(content: content), at: 0)
         // Удаляем лишний элемент, если превышен лимит
         if items.count > 20 {
             items.removeLast()
@@ -129,13 +138,13 @@ class ClipboardManager: ObservableObject {
         }
     }
 
-    private func performSync(items: [String], pinnedItems: [String], immediate: Bool) {
+    private func performSync(items: [ClipboardItem], pinnedItems: [ClipboardItem], immediate: Bool) {
         guard let url = URL(string: "https://example.com/api/sync") else { return }
 
         // Capture state on main thread before moving to background
         let payload: [String: Any] = [
-            "items": items,
-            "pinnedItems": pinnedItems
+            "items": items.map { $0.content },
+            "pinnedItems": pinnedItems.map { $0.content }
         ]
 
         // ⚡ Bolt Optimization: This method is already executing inside a debounced
@@ -169,9 +178,9 @@ class ClipboardManager: ObservableObject {
         task.resume()
     }
 
-    func pinItem(_ item: String) {
+    func pinItem(_ content: String) {
         // Убираем из обычного списка, если элемент там есть
-        if let index = items.firstIndex(of: item) {
+        if let index = items.firstIndex(where: { $0.content == content }) {
             items.remove(at: index)
         }
 
@@ -181,14 +190,14 @@ class ClipboardManager: ObservableObject {
             pinnedItems.removeLast()
         }
         
-        pinnedItems.insert(item, at: 0)
+        pinnedItems.insert(ClipboardItem(content: content), at: 0)
     }
 
-    func unpinItem(_ item: String) {
+    func unpinItem(_ content: String) {
         // Убираем из закрепленных
-        if let index = pinnedItems.firstIndex(of: item) {
+        if let index = pinnedItems.firstIndex(where: { $0.content == content }) {
             pinnedItems.remove(at: index)
-            addItem(item)
+            addItem(content)
         }
     }
 
