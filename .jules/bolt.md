@@ -24,3 +24,7 @@
 ## 2024-12-07 - Prevent O(N) String Hashing in UI Loop by Wrapping with Identifiable Struct
 **Learning:** In SwiftUI, using `id: \.self` for potentially large strings in `ForEach` loops causes massive O(N) hashing overhead on the main thread during UI renders. This blocks the main thread and introduces significant stuttering.
 **Action:** Avoid `id: \.self` on raw large String collections. Instead, wrap the data in an `Identifiable` struct (e.g., `ClipboardItem` with a `let id = UUID()`) and rely on the automatic `.id` conformance for O(1) loop iteration lookup performance.
+
+## 2024-11-26 - Redundant Background Dispatch and Double-Delay Anti-Pattern
+**Learning:** When offloading work to a background queue with a delay (e.g., using `DispatchQueue.global(qos: .utility).asyncAfter`), wrapping the target method in another `DispatchWorkItem` that also performs a delayed dispatch creates a "double-delay" bug and spawns redundant background threads. In `ClipboardApp.swift`, `syncWithServer(immediate:)` already handled the delay and background dispatch, but `performSync(items:pinnedItems:)` duplicated this logic, unnecessarily increasing latency and thread contention.
+**Action:** Always verify the execution context (thread/queue) of the caller before dispatching a task to a background queue or adding a delay. If a method is only invoked from an asynchronous, delayed background block, it should execute its logic synchronously.
