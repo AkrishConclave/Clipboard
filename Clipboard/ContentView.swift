@@ -78,6 +78,7 @@ struct ClipboardRow: View {
         HStack {
             Text(item.content)
                 .lineLimit(1)
+                .help(item.count > 250 ? String(item.prefix(250)) + "..." : item)
             Spacer()
             Button(action: {
                 clipboardManager.copyToClipboard(item.content)
