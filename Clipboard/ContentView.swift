@@ -16,7 +16,7 @@ struct ContentView: View {
             List {
                 if !clipboardManager.pinnedItems.isEmpty {
                     Section(header: Text("Закрепленные")) {
-                        ForEach(clipboardManager.pinnedItems, id: \.self) { item in
+                        ForEach(clipboardManager.pinnedItems) { item in
                             ClipboardRow(item: item, isPinned: true)
                         }
                     }
@@ -33,7 +33,7 @@ struct ContentView: View {
                         .frame(maxWidth: .infinity)
                         .padding()
                     }
-                    ForEach(clipboardManager.items, id: \.self) { item in
+                    ForEach(clipboardManager.items) { item in
                         ClipboardRow(item: item, isPinned: false)
                     }
                 }
@@ -68,7 +68,7 @@ struct ContentView: View {
 
 struct ClipboardRow: View {
     @EnvironmentObject var clipboardManager: ClipboardManager
-    let item: String
+    let item: ClipboardItem
     let isPinned: Bool
     @State private var hasCopied = false
 
@@ -76,11 +76,11 @@ struct ClipboardRow: View {
 
     var body: some View {
         HStack {
-            Text(item)
+            Text(item.content)
                 .lineLimit(1)
             Spacer()
             Button(action: {
-                clipboardManager.copyToClipboard(item)
+                clipboardManager.copyToClipboard(item.content)
                 withAnimation {
                     isCopied = true
                 }
