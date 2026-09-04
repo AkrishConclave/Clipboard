@@ -125,7 +125,7 @@ class ClipboardManager: ObservableObject {
         let currentPinnedItems = self.pinnedItems
 
         let workItem = DispatchWorkItem { [weak self] in
-            self?.performSync(items: currentItems, pinnedItems: currentPinnedItems)
+            self?.performSync(items: currentItems, pinnedItems: currentPinnedItems, immediate: immediate)
         }
 
         syncWorkItem = workItem
@@ -166,6 +166,7 @@ class ClipboardManager: ObservableObject {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = jsonData
+        request.timeoutInterval = 10.0 // 🛡️ Sentinel: Prevent hanging network requests (DoS protection)
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
