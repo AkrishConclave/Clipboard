@@ -24,8 +24,14 @@ struct ContentView: View {
 
                 Section(header: Text("История")) {
                     if clipboardManager.items.count < 1 {
-                        Text("Элементов нет")
-                            .foregroundColor(.secondary)
+                        VStack(spacing: 8) {
+                            Image(systemName: "doc.on.clipboard")
+                                .font(.largeTitle)
+                            Text("Буфер обмена пуст")
+                        }
+                        .foregroundColor(.secondary)
+                        .frame(maxWidth: .infinity)
+                        .padding()
                     }
                     ForEach(clipboardManager.items, id: \.self) { item in
                         ClipboardRow(item: item, isPinned: false)
@@ -84,8 +90,9 @@ struct ClipboardRow: View {
                     }
                 }
             }) {
-                Image(systemName: isCopied ? "checkmark" : "doc.on.doc")
+                Label("Скопировать", systemImage: isCopied ? "checkmark" : "doc.on.doc")
                     .foregroundColor(isCopied ? .green : .primary)
+                    .labelStyle(.iconOnly)
             }
             .buttonStyle(BorderlessButtonStyle())
             .help(isCopied ? "Скопировано!" : "Скопировать")
@@ -94,7 +101,8 @@ struct ClipboardRow: View {
                 Button(action: {
                     clipboardManager.unpinItem(item)
                 }) {
-                    Image(systemName: "pin.slash.fill")
+                    Label("Открепить", systemImage: "pin.slash.fill")
+                        .labelStyle(.iconOnly)
                 }
                 .buttonStyle(BorderlessButtonStyle())
                 .help("Открепить")
@@ -102,7 +110,8 @@ struct ClipboardRow: View {
                 Button(action: {
                     clipboardManager.pinItem(item)
                 }) {
-                    Image(systemName: "pin.fill")
+                    Label("Закрепить", systemImage: "pin.fill")
+                        .labelStyle(.iconOnly)
                 }
                 .buttonStyle(BorderlessButtonStyle())
                 .help("Закрепить")
