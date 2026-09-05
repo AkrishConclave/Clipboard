@@ -225,7 +225,9 @@ class ClipboardManager: ObservableObject {
             pinnedItems.removeLast()
         }
         
-        pinnedItems.insert(ClipboardItem(content: content), at: 0)
+        // ⚡ Bolt Optimization: Insert existing `item` to retain `id` for SwiftUI diffing (O(1))
+        // and fix compilation error from undefined `content` variable.
+        pinnedItems.insert(item, at: 0)
     }
 
     func unpinItem(_ item: ClipboardItem) {
