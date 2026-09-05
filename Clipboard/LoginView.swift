@@ -21,9 +21,11 @@ struct LoginView: View {
             VStack(spacing: 12) {
                 TextField("Имя пользователя", text: $username)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .textContentType(.username)
 
                 SecureField("Пароль", text: $password)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .textContentType(.password)
             }
             .frame(width: 200)
 
@@ -34,6 +36,7 @@ struct LoginView: View {
             .buttonStyle(.borderedProminent)
             .controlSize(.large)
             .disabled(username.isEmpty || password.isEmpty)
+            .help(username.isEmpty || password.isEmpty ? "Введите имя пользователя и пароль, чтобы войти" : "Войти")
             .keyboardShortcut(.defaultAction)
         }
         .padding()
