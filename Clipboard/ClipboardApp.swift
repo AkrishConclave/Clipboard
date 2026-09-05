@@ -45,10 +45,42 @@ struct ClipboardManagerApp: App {
 struct ClipboardItem: Identifiable, Equatable, Codable {
     let id: UUID
     let content: String
+    let previewText: String
+
+    // Explicit CodingKeys to preserve backward compatibility (exclude previewText)
+    enum CodingKeys: String, CodingKey {
+        case id
+        case content
+    }
 
     init(id: UUID = UUID(), content: String) {
         self.id = id
         self.content = content
+        self.previewText = ClipboardItem.computePreviewText(for: content)
+    }
+
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.id = try container.decode(UUID.self, forKey: .id)
+        let content = try container.decode(String.self, forKey: .content)
+        self.content = content
+        self.previewText = ClipboardItem.computePreviewText(for: content)
+    }
+
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(id, forKey: .id)
+        try container.encode(content, forKey: .content)
+    }
+
+    // ⚡ Bolt Optimization: Precompute preview text here to avoid O(N) string hashing
+    // and prefixing inside SwiftUI render loops. We use .utf16.count for O(1) length check.
+    private static func computePreviewText(for content: String) -> String {
+        if content.utf16.count > 250 {
+            return String(content.prefix(250)) + "..."
+        } else {
+            return content
+        }
     }
 }
 
