@@ -45,6 +45,8 @@ struct LoginView: View {
         // Для данной задачи просто устанавливаем флаг.
         if !username.isEmpty && !password.isEmpty {
             isLoggedIn = true
+            // 🛡️ Sentinel: Clear sensitive password from memory after successful authentication
+            password = ""
         }
     }
 }

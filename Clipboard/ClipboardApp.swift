@@ -99,6 +99,10 @@ class ClipboardManager: ObservableObject {
 
     func monitorClipboard() {
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            // 🛡️ Sentinel: Prevent unauthenticated background data exfiltration
+            let isLoggedIn = UserDefaults.standard.bool(forKey: "isLoggedIn")
+            guard isLoggedIn else { return }
+
             if self.pasteboard.changeCount != self.lastChangeCount {
                 self.lastChangeCount = self.pasteboard.changeCount
 
@@ -225,7 +229,7 @@ class ClipboardManager: ObservableObject {
             pinnedItems.removeLast()
         }
         
-        pinnedItems.insert(ClipboardItem(content: content), at: 0)
+        pinnedItems.insert(ClipboardItem(content: item.content), at: 0)
     }
 
     func unpinItem(_ item: ClipboardItem) {
