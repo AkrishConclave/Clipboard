@@ -10,3 +10,6 @@
 ## 2026-09-03 - Accessible Icon-Only Buttons & Empty States in SwiftUI List Views
 **Learning:** In macOS list views (and SwiftUI generally), using plain `Image(systemName:)` for icon-only buttons lacks semantic meaning for screen readers, even with a `.help()` tooltip. Additionally, basic text like "No items" feels unpolished and non-informative in a native macOS app.
 **Action:** Consistently use `Label("Action", systemImage: "icon").labelStyle(.iconOnly)` for icon-only buttons to ensure they are fully accessible to VoiceOver. For list empty states, always use a visually polished `VStack` combining a relevant system icon and descriptive text.
+## 2024-11-26 - Tooltips for Truncated Text
+**Learning:** In macOS lists where text is restricted to a single line (`.lineLimit(1)`) to save space, users lose the ability to preview long or multi-line content. This forces them to copy the item just to see what it is, degrading the experience.
+**Action:** Always add a `.help()` tooltip to single-line truncated text elements containing user data, allowing users to preview the full (or partially truncated) content on hover. Ensure the tooltip text length is safely capped (e.g., 250-500 chars) to prevent UI freezing on massive items.
