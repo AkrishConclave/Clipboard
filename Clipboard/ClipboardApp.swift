@@ -225,7 +225,7 @@ class ClipboardManager: ObservableObject {
             pinnedItems.removeLast()
         }
         
-        pinnedItems.insert(item, at: 0)
+        pinnedItems.insert(ClipboardItem(content: content), at: 0)
     }
 
     func unpinItem(_ item: ClipboardItem) {

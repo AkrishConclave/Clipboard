@@ -100,7 +100,7 @@ struct ClipboardRow: View {
 
             if isPinned {
                 Button(action: {
-                    clipboardManager.unpinItem(item)
+                    clipboardManager.unpinItem(item.content)
                 }) {
                     Label("Открепить", systemImage: "pin.slash.fill")
                         .labelStyle(.iconOnly)
@@ -109,7 +109,7 @@ struct ClipboardRow: View {
                 .help("Открепить")
             } else {
                 Button(action: {
-                    clipboardManager.pinItem(item)
+                    clipboardManager.pinItem(item.content)
                 }) {
                     Label("Закрепить", systemImage: "pin.fill")
                         .labelStyle(.iconOnly)
