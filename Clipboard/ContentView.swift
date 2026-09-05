@@ -76,7 +76,9 @@ struct ClipboardRow: View {
 
     var body: some View {
         HStack {
-            Text(item.content)
+            // ⚡ Bolt Optimization: Use precomputed `previewText` instead of massive `content` string.
+            // CoreText struggles to layout megabyte-sized strings even when truncated via `.lineLimit(1)`.
+            Text(item.previewText)
                 .lineLimit(1)
                 .help(item.previewText)
             Spacer()
