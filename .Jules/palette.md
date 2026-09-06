@@ -13,3 +13,6 @@
 ## 2024-11-26 - Tooltips for Truncated Text
 **Learning:** In macOS lists where text is restricted to a single line (`.lineLimit(1)`) to save space, users lose the ability to preview long or multi-line content. This forces them to copy the item just to see what it is, degrading the experience.
 **Action:** Always add a `.help()` tooltip to single-line truncated text elements containing user data, allowing users to preview the full (or partially truncated) content on hover. Ensure the tooltip text length is safely capped (e.g., 250-500 chars) to prevent UI freezing on massive items.
+## 2026-09-06 - Password Manager Integration & Disabled State Tooltips
+**Learning:** Adding `.textContentType` modifiers to authentication fields drastically improves UX by enabling OS-level password manager autofill. Additionally, adding `.help()` tooltips to disabled primary buttons provides crucial context for users who might otherwise be confused about why they cannot proceed.
+**Action:** In SwiftUI authentication forms, always apply `.textContentType(.username)` and `.textContentType(.password)` to relevant fields, and use `.help()` tooltips to explain disabled states on primary submission buttons.
