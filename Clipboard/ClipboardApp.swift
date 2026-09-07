@@ -99,9 +99,9 @@ class ClipboardManager: ObservableObject {
 
     func monitorClipboard() {
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
-            // 🛡️ Sentinel: Background tasks and timers can run completely detached from the UI authentication state.
-            // Explicitly check authentication state to prevent unauthenticated data exfiltration.
-            guard UserDefaults.standard.bool(forKey: "isLoggedIn") else { return }
+            // 🛡️ Sentinel: Prevent unauthenticated background data exfiltration
+            let isLoggedIn = UserDefaults.standard.bool(forKey: "isLoggedIn")
+            guard isLoggedIn else { return }
 
             if self.pasteboard.changeCount != self.lastChangeCount {
                 self.lastChangeCount = self.pasteboard.changeCount
@@ -229,8 +229,7 @@ class ClipboardManager: ObservableObject {
             pinnedItems.removeLast()
         }
         
-        // ⚡ Bolt: Reuse the existing item to preserve its ID and avoid unnecessary re-renders
-        pinnedItems.insert(item, at: 0)
+        pinnedItems.insert(ClipboardItem(content: item.content), at: 0)
     }
 
     func unpinItem(_ item: ClipboardItem) {
