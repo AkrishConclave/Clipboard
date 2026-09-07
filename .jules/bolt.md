@@ -38,3 +38,10 @@
 ## 2024-12-07 - Preserve Identifiable ID Stability During List Mutations
 **Learning:** Recreating `Identifiable` objects (like `ClipboardItem`) during list mutations (e.g., pinning/unpinning) destroys the original `UUID` generated during initialization. In SwiftUI, this loss of ID stability breaks O(1) view diffing, forcing the framework to tear down and fully re-render the view hierarchy for the recreated item. This causes severe performance regressions, UI stutter, and potential loss of local view state.
 **Action:** When updating collections in SwiftUI state (such as moving items between `items` and `pinnedItems` arrays), always move and reuse the existing `Identifiable` objects rather than instantiating new ones. This preserves the original `id` and ensures SwiftUI can efficiently animate and diff the UI.
+## 2024-12-08 - Preserve SwiftUI O(1) Diffing by Reusing Identifiable Objects
+**Learning:** Recreating `Identifiable` structs (like `ClipboardItem`) when moving them between collections changes their `id`. This breaks SwiftUI's ability to track the object's identity across state changes, forcing it to destroy and recreate the view (O(N) operation) instead of smoothly animating or updating the existing view (O(1) operation).
+**Action:** When updating collections in SwiftUI state (like pinning or unpinning an item), always reuse the existing `Identifiable` object rather than instantiating a new one with the same content. This preserves the `id` and maintains optimal rendering performance.
+
+## 2024-12-07 - Avoid Large Strings in SwiftUI Text Directly
+**Learning:** Even with modifiers like `.lineLimit(1)`, passing extremely large strings (e.g., multimegabyte clipboard contents) directly into a SwiftUI `Text` view causes severe main-thread blocking and UI hangs, as the underlying layout engine (CoreText) still struggles with the initial data ingest and layout calculation.
+**Action:** Always pre-compute a safely truncated version (e.g., maximum 250 characters) of large string payloads at the data model level, and bind only the truncated string to the SwiftUI UI elements to prevent rendering bottlenecks.
