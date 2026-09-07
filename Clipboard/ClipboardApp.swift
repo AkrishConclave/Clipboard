@@ -229,6 +229,7 @@ class ClipboardManager: ObservableObject {
             pinnedItems.removeLast()
         }
         
+        // ⚡ Bolt: Reuse the existing item to preserve its ID and avoid unnecessary re-renders
         pinnedItems.insert(item, at: 0)
     }
 
@@ -237,13 +238,14 @@ class ClipboardManager: ObservableObject {
         if let index = pinnedItems.firstIndex(where: { $0.id == item.id }) {
             pinnedItems.remove(at: index)
 
-            // Добавляем в начало списка
-            items.insert(item, at: 0)
-            // Удаляем лишний элемент, если превышен лимит
-            if items.count > 20 {
-                items.removeLast()
+            // ⚡ Bolt: Check for duplicates and reuse the existing item to preserve its ID
+            if !items.contains(where: { $0.id == item.id }) {
+                items.insert(item, at: 0)
+                if items.count > 20 {
+                    items.removeLast()
+                }
+                syncWithServer()
             }
-            syncWithServer()
         }
     }
 
