@@ -35,3 +35,7 @@
 ## 2024-12-07 - Precompute String Formatting to Prevent SwiftUI Render Blocking
 **Learning:** Performing O(N) operations like string truncation or grapheme clustering (`.count`) dynamically inside a SwiftUI view's `body` property (e.g., inside a `.help` modifier) causes severe main thread blocking and lag during re-renders, especially for views holding large string payloads (like clipboard history). Additionally, attempting to access `.count` on custom struct types without mapping back to their string content is an easy way to introduce runtime or compile-time crashes.
 **Action:** When a UI component needs to display derived or truncated text based on large data, precompute this formatting during model initialization (e.g., in the `ClipboardItem` init). Use `.utf16.count` for O(1) string length checks and bind the precalculated result to the UI view.
+
+## 2024-12-07 - Avoid Large Strings in SwiftUI Text Directly
+**Learning:** Even with modifiers like `.lineLimit(1)`, passing extremely large strings (e.g., multimegabyte clipboard contents) directly into a SwiftUI `Text` view causes severe main-thread blocking and UI hangs, as the underlying layout engine (CoreText) still struggles with the initial data ingest and layout calculation.
+**Action:** Always pre-compute a safely truncated version (e.g., maximum 250 characters) of large string payloads at the data model level, and bind only the truncated string to the SwiftUI UI elements to prevent rendering bottlenecks.
