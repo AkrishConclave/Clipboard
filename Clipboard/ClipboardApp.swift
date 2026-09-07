@@ -236,7 +236,15 @@ class ClipboardManager: ObservableObject {
         // Убираем из закрепленных
         if let index = pinnedItems.firstIndex(where: { $0.id == item.id }) {
             pinnedItems.remove(at: index)
-            addItem(item.content)
+
+            // ⚡ Bolt: Check for duplicates and reuse the existing item to preserve its ID
+            if !items.contains(where: { $0.id == item.id }) {
+                items.insert(item, at: 0)
+                if items.count > 20 {
+                    items.removeLast()
+                }
+                syncWithServer()
+            }
         }
     }
 
