@@ -229,8 +229,6 @@ class ClipboardManager: ObservableObject {
             pinnedItems.removeLast()
         }
         
-        // ⚡ Bolt Optimization: Insert existing `item` to retain `id` for SwiftUI diffing (O(1))
-        // and fix compilation error from undefined `content` variable.
         pinnedItems.insert(item, at: 0)
     }
 
@@ -238,7 +236,13 @@ class ClipboardManager: ObservableObject {
         // Убираем из закрепленных
         if let index = pinnedItems.firstIndex(where: { $0.id == item.id }) {
             pinnedItems.remove(at: index)
-            addItem(item.content)
+
+            // Re-inserting with the same object to preserve Identity
+            items.insert(item, at: 0)
+            if items.count > 20 {
+                items.removeLast()
+            }
+            syncWithServer()
         }
     }
 
