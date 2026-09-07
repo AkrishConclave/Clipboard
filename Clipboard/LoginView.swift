@@ -38,6 +38,7 @@ struct LoginView: View {
             .disabled(username.isEmpty || password.isEmpty)
             .help(username.isEmpty || password.isEmpty ? "Введите имя пользователя и пароль, чтобы войти" : "Войти")
             .keyboardShortcut(.defaultAction)
+            .help(username.isEmpty || password.isEmpty ? "Введите имя пользователя и пароль" : "Войти")
         }
         .padding()
         .frame(width: 300, height: 400)
