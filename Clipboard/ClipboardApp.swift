@@ -237,8 +237,9 @@ class ClipboardManager: ObservableObject {
         if let index = pinnedItems.firstIndex(where: { $0.id == item.id }) {
             pinnedItems.remove(at: index)
 
-            // Re-inserting with the same object to preserve Identity
+            // Добавляем в начало списка
             items.insert(item, at: 0)
+            // Удаляем лишний элемент, если превышен лимит
             if items.count > 20 {
                 items.removeLast()
             }
