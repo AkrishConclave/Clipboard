@@ -99,6 +99,10 @@ class ClipboardManager: ObservableObject {
 
     func monitorClipboard() {
         Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { _ in
+            // 🛡️ Sentinel: Background tasks and timers can run completely detached from the UI authentication state.
+            // Explicitly check authentication state to prevent unauthenticated data exfiltration.
+            guard UserDefaults.standard.bool(forKey: "isLoggedIn") else { return }
+
             if self.pasteboard.changeCount != self.lastChangeCount {
                 self.lastChangeCount = self.pasteboard.changeCount
 
